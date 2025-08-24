@@ -8,8 +8,8 @@ class MessageHandlers:
     @staticmethod
     def handle_greeting(state: State) -> Dict[str, Any]:
         """Handle greeting messages"""
-        response = "Hello! Welcome to Foodstation.lk! How can I help you with food delivery today?"
-        
+        response_text = "Hello! Welcome to Foodstation.lk! How can I help you with food delivery today?"
+        response = state.get("fallback_response") or response_text
         return {
             "messages": add_messages(
                 state["messages"], 

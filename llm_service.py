@@ -142,7 +142,7 @@ Output:
 
             # Parse the result
             response_text = result.get("text", "{}").strip()
-            print("Intent classified")
+            print(f"Intent {response_text}")
             return json.loads(response_text)
 
         except json.JSONDecodeError as e:

@@ -56,3 +56,4 @@ class State(TypedDict):
     order_state: Optional[OrderState]
     cart: Optional[List[CartItem]]
     next: Optional[str]  # For routing decisions
+    fallback_response: Optional[str]

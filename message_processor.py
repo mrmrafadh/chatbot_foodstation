@@ -34,13 +34,15 @@ class MessageProcessor:
             
             intent_result, entity_result = await asyncio.gather(intent_task, entity_task)
 
+            print(intent_result)
+            print(entity_result)
             print("Processing completed successfully")
             
             # Create entities dictionary if dish is found
             entities_dict = {}
             if entity_result.get("dish"):
                 item = Item(
-                    dish=entity_result["dish"][0],
+                    dish=entity_result["dish"][0] if entity_result.get("dish") else None,
                     variant=entity_result.get("variant", ""),
                     size=entity_result.get("size"),
                     qty=int(entity_result.get("order_qty", 1)) if entity_result.get("order_qty") else 1
@@ -51,15 +53,15 @@ class MessageProcessor:
             message_content = MessageContent(
                 input=user_input,
                 corrected_input=intent_result.get("corrected_input", user_input),
-                restaurant_name=entity_result.get("restaurant")[0],
-                entities=entities_dict
+                restaurant_name=entity_result.get("restaurant")[0] if entity_result.get("restaurant") else None,
+                entities=entities_dict,
             )
-            
+            print("hihi")
             # Return updated state
             return {
                 "message_type": intent_result.get("category", "general_inquiry"),
-                "message_content": message_content,
-                "is_awaiting_selection": False,
+                "fallback_response": intent_result.get("fallback_response", ""),
+                "message_content": message_content
             }
             
         except Exception as e:
