@@ -10,4 +10,5 @@ dependencies = [
     "langchain-core>=0.3.74",
     "langchain-groq>=0.3.7",
     "langgraph>=0.6.6",
+    "mysql-connector-python>=9.4.0",
 ]

@@ -1,6 +1,7 @@
 from typing import Dict, Any
 from langgraph.graph import add_messages
 from models import State
+from db_config import db_config
 
 class MessageHandlers:
     """Collection of message handler functions"""
@@ -54,31 +55,39 @@ Would you like to proceed with this order or make any changes?"""
         message_content = state.get("message_content")
         
         if message_content and message_content.entities:
-            dish_name = None
+            dish_name = message_content.entities.get("dish")
             restaurant_name = message_content.restaurant_name
-            
-            # Get dish name from entities
-            for key, item in message_content.entities.items():
-                if item.dish:
-                    dish_name = item.dish
-                    break
-            
-            if dish_name:
-                response = f"You're asking about {dish_name}"
-                if restaurant_name:
-                    response += f" from {restaurant_name}"
-                response += ". Let me get that information for you!"
-            else:
-                response = "I'd be happy to help you with dish information! Which dish would you like to know about?"
-        else:
-            response = "I can help you with dish information! Which dish are you interested in?"
-        
-        return {
-            "messages": add_messages(
-                state["messages"], 
-                [{"role": "assistant", "content": response}]
-            )
-        }
+
+            if not dish_name:
+                return {
+                    "messages": add_messages(
+                        state["messages"],
+                        [{"role": "assistant", "content": "Please give me a valid dish name"}]
+                        )}
+
+                if len(dish_name) > 1 or len(restaurant_name) > 1:
+                    fallback_message = "I can only check one dish at a time. Here’s the info for this dish."
+
+                    # Get dish name from entities
+                    dish_name = dish_name[0]
+                    restaurant_name = restaurant_name[0]
+
+                    if dish_name & restaurant_name:
+                        response = f"You're asking about {dish_name}"
+                        if restaurant_name:
+                            response += f" from {restaurant_name}"
+                        response += ". Let me get that information for you!"
+                    else:
+                        response = "I'd be happy to help you with dish information! Which dish would you like to know about?"
+                else:
+                    response = "I can help you with dish information! Which dish are you interested in?"
+
+                return {
+                    "messages": add_messages(
+                        state["messages"],
+                        [{"role": "assistant", "content": response}]
+                    )
+                }
     
     @staticmethod
     def handle_restaurant_info(state: State) -> Dict[str, Any]:
