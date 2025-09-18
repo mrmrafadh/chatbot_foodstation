@@ -1,6 +1,9 @@
 from db_config import db_config
 from typing import List, Tuple, Optional
 import contextlib
+from collections import defaultdict
+import json
+from decimal import Decimal
 
 
 class DB_extract_price_data:
@@ -61,6 +64,17 @@ class DB_extract_price_data:
         return base_query, parameters
 
     @staticmethod
+    def convert_decimal(obj):
+        if isinstance(obj, dict):
+            return {k: DB_extract_price_data.convert_decimal(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [DB_extract_price_data.convert_decimal(i) for i in obj]
+        elif isinstance(obj, Decimal):
+            return float(obj)
+        return obj
+
+
+    @staticmethod
     def _format_results(results: List[Tuple], variant: Optional[str] = None,
                         size: Optional[str] = None) -> List[Tuple]:
         """Format and filter query results."""
@@ -86,8 +100,17 @@ class DB_extract_price_data:
         #     ]
 
         # Convert back to list of tuples
-        print(formatted_data)
-        return [tuple(item[key] for key in keys) for item in formatted_data]
+        # print(f"check {formatted_data}")
+        grouped = defaultdict(list)
+        for item in formatted_data:
+            restaurant = item.pop('restaurant')  # remove to avoid duplication inside
+            grouped[restaurant].append(item)
+        grouped_by_restaurant = dict(grouped)
+        grouped_by_restaurant = DB_extract_price_data.convert_decimal(grouped_by_restaurant)
+        print(grouped_by_restaurant)
+        return json.dumps(grouped_by_restaurant, indent=2, ensure_ascii=False)
+
+
 
     @classmethod
     def db_price_inquiry(cls, dish_name: str, restaurant_name: Optional[str] = None,
@@ -129,13 +152,13 @@ if __name__ == "__main__":
             restaurant_name=None,
             variant="beef"
         )
-        print(results)
+        # print(results)
         # Search specific restaurant
         results = DB_extract_price_data.db_price_inquiry(
             dish_name="kotthu",
             restaurant_name="Mum’s Food",
             variant="beef"
         )
-        print(results)
+        # print(results)
     except Exception as e:
         print(f"Error: {e}")

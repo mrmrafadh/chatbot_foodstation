@@ -56,7 +56,7 @@ class MessageProcessor:
                 restaurant_name=entity_result.get("restaurant")[0] if entity_result.get("restaurant") else None,
                 entities=entities_dict,
             )
-            print("hihi")
+            print(entities_dict)
             # Return updated state
             return {
                 "message_type": intent_result.get("category", "general_inquiry"),

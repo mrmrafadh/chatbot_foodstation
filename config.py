@@ -8,7 +8,7 @@ class Config:
     GROQ_API_KEY = os.getenv('GROQ_API_KEY')
     
     # Model Configuration
-    MODEL_NAME = "groq:llama3-70b-8192"
+    MODEL_NAME = "groq:openai/gpt-oss-120b"
     
     # Restaurant List (exact spelling)
     RESTAURANTS = [
